@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { Answer } from "@/models/Answers";
 import { Interview } from "@/models/Interview";
+import { User } from "@/models/Users";
 
 export class Database {
     private static instance: DataSource;
@@ -14,11 +15,12 @@ export class Database {
             host: process.env.DB_HOST,
             port: Number(process.env.DB_PORT),
             username: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
+            password: process.env.DB_PASS,
             database: process.env.DB_NAME,
             synchronize: false, 
-            entities: [Answer, Interview],
-          });;
+            entities: [User, Answer, Interview],
+          });
+
         } catch (error) {
           console.error('Failed to create database instance:', error);
           throw error;

@@ -1,28 +1,29 @@
 import { Database } from "@/db/Database";
 import { Interview } from "@/models/Interview";
-import { NextApiRequest, NextApiResponse } from "next";
 import { Answer } from "@/models/Answers";
+import { v4 as uuidv4 } from 'uuid';
+import { NextResponse } from "next/server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "POST") return res.status(405).end();
+export async function POST(req: Request) {
 
-    const { interviewId, question, answer } = await req.body;
-    await Database.getInstance().initialize();
+    const { interviewId, question, answer } = await req.json();
+    Database.getInstance().isInitialized ? console.log("Database is initialized") : await Database.getInstance().initialize();
     const interviewRepo = Database.getInstance().getRepository(Interview);
     const answerRepo = Database.getInstance().getRepository(Answer);
 
     const interview = await interviewRepo.findOne({ where: { id: interviewId } });
 
     if(!interview) {
-        return res.status(404).json({ error: "Interview not found" });
+        return NextResponse.json({ error: "Interview not found" }, { status: 404 });
     }
 
     const newAnswer = new Answer();
+    newAnswer.id = uuidv4();
     newAnswer.interviewId = interviewId;
     newAnswer.question = question;
     newAnswer.answer = answer;
 
     const savedAnswer = await answerRepo.save(newAnswer);
 
-    return res.status(200).json(savedAnswer);
+    return NextResponse.json(savedAnswer);
 }

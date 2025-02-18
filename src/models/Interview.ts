@@ -1,5 +1,6 @@
-import { Entity, Column, BaseEntity, PrimaryColumn, OneToMany } from "typeorm";
+import { Entity, Column, BaseEntity, PrimaryColumn, OneToMany, ManyToOne, JoinColumn } from "typeorm";
 import { Answer } from "./Answers";
+import { User } from "./Users";
 
 @Entity({name: "interview"})
 export class Interview extends BaseEntity {
@@ -10,13 +11,20 @@ export class Interview extends BaseEntity {
   role: string;
 
   @Column()
-  candidate: string;
+  profile: string;
 
   @Column()
   difficulty: string;
 
   @Column({ default: false })
   completed: boolean;
+
+  @Column()
+  userId: string;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: "userId" })
+  user: User;
 
   @OneToMany(() => Answer, (answer) => answer.interview)
   answers: Answer[];

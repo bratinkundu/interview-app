@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryColumn, BaseEntity, ManyToOne, JoinColumn } from "typeorm";
-import { Interview } from "./Interview";
+// import { Interview } from "./Interview";
 
 @Entity({name: "answers"})
 export class Answer extends BaseEntity{
@@ -15,7 +15,7 @@ export class Answer extends BaseEntity{
   @Column({type: 'uuid'})
   interviewId: string | null;
   
-  @ManyToOne(() => Interview, (interview) => interview.id)
-  @JoinColumn({ name: "interviewId" })
-  interview: Interview;
+  // @ManyToOne(() => Interview, (interview) => interview.id)
+  // @JoinColumn({ name: "interviewId" })
+  // interview: Interview;
 }
