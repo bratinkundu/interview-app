@@ -1,33 +1,72 @@
 "use client";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 
-export default function Results({ params }: { params: { id: string } }) {
-  const [feedback, setFeedback] = useState("Loading feedback...");
+type Feedback = {
+  strengths?: string[];
+  areasForImprovement?: string[];
+  finalAssessment?: {
+    result: string;
+    justification: string;
+  };
+};
+
+export default function Results({ params }: { params: Promise<{ id: string }> }) {
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const searchParams = useSearchParams();
+  const reason = searchParams.get("reason") || "No reason provided";
+  const { id } = use(params);
 
   useEffect(() => {
     async function fetchFeedback() {
       const res = await fetch("/api/get-feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ interviewId: params.id }),
+        body: JSON.stringify({ interviewId: id, reason }),
       });
 
       const data = await res.json();
-      setFeedback(data.feedback);
+      setFeedback(data.feedbackResponse);
     }
 
     fetchFeedback();
-  }, [params.id]);
+  }, [id]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-96 p-6">
-        <h2 className="text-xl font-semibold">Interview Feedback</h2>
-        <p className="mt-4 text-gray-600">{feedback}</p>
-        <Button className="mt-4 w-full" onClick={() => window.location.href = "/"}>
-          Start New Interview
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-6">
+      <Card className="w-full max-w-2xl p-6">
+        <h2 className="text-2xl font-semibold mb-4">Interview Feedback</h2>
+
+        {feedback ? (
+          <>
+            <h3 className="text-lg font-semibold mt-4">Strengths</h3>
+            <ul className="list-disc list-inside text-gray-700">
+              {feedback.strengths?.map((strength, index) => (
+                <li key={index}>{strength}</li>
+              ))}
+            </ul>
+
+            <h3 className="text-lg font-semibold mt-4">Areas for Improvement</h3>
+            <ul className="list-disc list-inside text-gray-700">
+              {feedback.areasForImprovement?.map((area, index) => (
+                <li key={index}>{area}</li>
+              ))}
+            </ul>
+
+            <h3 className="text-lg font-semibold mt-4">Final Assessment</h3>
+            <p>
+              <strong>Result:</strong> {feedback.finalAssessment?.result}
+            </p>
+            <p className="text-gray-700">{feedback.finalAssessment?.justification}</p>
+          </>
+        ) : (
+          <p className="text-gray-500">Loading feedback...</p>
+        )}
+
+        <Button className="mt-6 w-full" onClick={() => window.location.href = "/dashboard"}>
+          Go to Dashboard
         </Button>
       </Card>
     </div>

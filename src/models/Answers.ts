@@ -12,6 +12,9 @@ export class Answer extends BaseEntity{
   @Column()
   answer: string;
 
+  @Column()
+  confidenceScore: number;
+
   @Column({type: 'uuid'})
   interviewId: string | null;
   

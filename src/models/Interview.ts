@@ -19,13 +19,16 @@ export class Interview extends BaseEntity {
   @Column({ default: false })
   completed: boolean;
 
+  @Column({default: ''})
+  reason: string;
+
+  @Column({default: ''})
+  feedback: string;
+
   @Column()
   userId: string;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: "userId" })
   user: User;
-
-  @OneToMany(() => Answer, (answer) => answer.interview)
-  answers: Answer[];
 }

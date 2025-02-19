@@ -9,7 +9,6 @@ export async function POST(req: Request) {
     try {
         const { email, aboutYou, role, difficulty } = await req.json();
         Database.getInstance().isInitialized ? console.log("Database is initialized") : await Database.getInstance().initialize();
-        await Database.getInstance().initialize();
 
         const userRepo = Database.getInstance().getRepository(User);
         const interviewRepo = Database.getInstance().getRepository(Interview);
