@@ -12,6 +12,8 @@ export default function Interview({ params }: { params: Promise<{ id: string }> 
   const [interviewStartTime, setInterviewStartTime] = useState<number | null>(null);
   const [conclusionTriggered, setConclusionTriggered] = useState(false);
   const [remainingQuestions, setRemainingQuestions] = useState(2);
+  const [editableTranscript, setEditableTranscript] = useState("");
+
   const router = useRouter();
 
   const { id } = use(params);
@@ -37,6 +39,10 @@ export default function Interview({ params }: { params: Promise<{ id: string }> 
   }, [interviewStartTime, conclusionTriggered]);
 
 
+  useEffect(() => {
+    setEditableTranscript(transcript);
+  }, [transcript]);
+
   async function fetchNextQuestion(previousAnswer?: string) {
 
     if (conclusionTriggered && remainingQuestions === 0) {
@@ -50,6 +56,7 @@ export default function Interview({ params }: { params: Promise<{ id: string }> 
       body: JSON.stringify({
         interviewId: id,
         previousAnswer,
+        previousQuestion: question,
         concludeSoon: conclusionTriggered,
       }),
     });
@@ -106,11 +113,17 @@ export default function Interview({ params }: { params: Promise<{ id: string }> 
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-96 p-6">
         <h2 className="text-xl font-semibold">{question}</h2>
-        <p className="mt-4">{transcript || "Click Start Speaking..."}</p>
+        {/* <p className="mt-4">{transcript || "Click Start Speaking..."}</p> */}
+        <input 
+          type="text" 
+          value={editableTranscript} 
+          onChange={(e) => setEditableTranscript(e.target.value)} 
+          className="mt-4 w-full p-2 border rounded-md"
+        />
         <Button onClick={() => startListening()} disabled={listening} className="mt-4">
           {listening ? "Listening..." : "Start Speaking"}
         </Button>
-        <Button onClick={submitAnswer} className="mt-4 w-full">Submit Answer</Button>
+        <Button onClick={submitAnswer} disabled={isListening} className="mt-4 w-full">Submit Answer</Button>
         <Button onClick={exitInterview} className="mt-4 w-full bg-red-500 hover:bg-red-600">Exit Interview</Button>
       </Card>
     </div>

@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 const genAI = new GoogleGenerativeAI(process.env.AI_KEY!);
 
 export async function POST(req: Request) {
-    const { interviewId, previousAnswer, concludeSoon } = await req.json();
+    const { interviewId, previousAnswer, previousQuestion, concludeSoon } = await req.json();
     Database.getInstance().isInitialized ? console.log("Database is initialized") : await Database.getInstance().initialize();
     const interviewRepo = Database.getInstance().getRepository(Interview);
     const interview = await interviewRepo.findOne({ where: { id: interviewId } });
@@ -16,24 +16,25 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Interview not found" }, { status: 404 });
     }
 
-    let prompt = `You are an interviewer conducting a comprehensive interview for the ${interview.role} role. The candidate's background is: ${interview.profile}. The difficulty level of this interview is ${interview.difficulty}. 
+    let prompt = `You are an interviewer conducting a comprehensive interview for the ${interview.role} role. 
+                  The candidate's background is: ${interview.profile}. 
+                  The difficulty level of this interview is ${interview.difficulty}. 
+
                   **YOUR GOAL**
                   - Ask only one question at a time.  
                   - Do not introduce the next question until the candidate has answered the previous one.  
                   - Keep the response concise (just one interview question).  
-                  - Ask a variety of questions covering different topics like problem-solving, technical skills, teamwork, leadership, communication, and industry trends. 
-                  - Ensure diversity and do not follow a strict sequence of topics. Occasionally, follow up on a previous answer if needed.
+                  - **Gradually increase** the complexity based on the role and difficulty level.  
     `;
 
     if (previousAnswer) {
-      prompt += ` The candidate's last answer was: "${previousAnswer}".`;
-
-      if (previousAnswer.length < 20) {
-        prompt += ` Since the answer was brief, ask for more details or an example to elaborate.`;
-      } 
-      else {
-        prompt += ` Instead of following up directly, switch to a different topic from the previous one to maintain variety.`;
-      }
+      prompt += `
+                ### **Handling Follow-Up Questions**  
+                The last question asked was:  **"${previousQuestion}"**  
+                The candidate's last answer was: "${previousAnswer}".
+                - **Do not repeat the previous questions**; instead, ask a logical next question.  
+                - Ensure the interview remains balanced, covering all the aspects for the ${interview.role} role.  
+                `;
     } 
     else {
       prompt += ` Start the interview with a general question about the candidate’s background or motivations for applying to this role.`;
