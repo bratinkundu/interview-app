@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Database } from "@/db/Database";
 import { Interview } from "@/models/Interview";
 import { NextResponse } from "next/server";
+import { BASE_PROMPT, FOLLOW_UP_PROMPT, GENERAL_QUESTION_PROMPT } from "@/helpers/prompts";
 
 // const openai = new OpenAI({ apiKey: process.env.AI_KEY });
 const genAI = new GoogleGenerativeAI(process.env.AI_KEY!);
@@ -16,28 +17,13 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Interview not found" }, { status: 404 });
     }
 
-    let prompt = `You are an interviewer conducting a comprehensive interview for the ${interview.role} role. 
-                  The candidate's background is: ${interview.profile}. 
-                  The difficulty level of this interview is ${interview.difficulty}. 
-
-                  **YOUR GOAL**
-                  - Ask only one question at a time.  
-                  - Do not introduce the next question until the candidate has answered the previous one.  
-                  - Keep the response concise (just one interview question).  
-                  - **Gradually increase** the complexity based on the role and difficulty level.  
-    `;
+    let prompt = BASE_PROMPT(interview);
 
     if (previousAnswer) {
-      prompt += `
-                ### **Handling Follow-Up Questions**  
-                The last question asked was:  **"${previousQuestion}"**  
-                The candidate's last answer was: "${previousAnswer}".
-                - **Do not repeat the previous questions**; instead, ask a logical next question.  
-                - Ensure the interview remains balanced, covering all the aspects for the ${interview.role} role.  
-                `;
+      prompt += FOLLOW_UP_PROMPT(previousQuestion, previousAnswer);
     } 
     else {
-      prompt += ` Start the interview with a general question about the candidate’s background or motivations for applying to this role.`;
+      prompt += GENERAL_QUESTION_PROMPT();
     }
 
     if (concludeSoon) {

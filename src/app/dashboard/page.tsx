@@ -51,6 +51,25 @@ export default function Dashboard() {
   // Form validation
   const isFormValid = category && subCategory && skills.length > 0 && role && experience && difficulty;
 
+  const handleStartInterview = async () => {
+    const form = {
+      category,
+      subCategory,
+      skills,
+      role,
+      experience,
+      difficulty,
+      additionalInfo,
+    };
+    const res = await fetch("/api/create-interview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: session?.user?.email, ...form }),
+    });
+    const data = await res.json();
+    router.push(`/interview/new/${data.id}`);
+  }
+
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       {/* User Welcome Section */}
@@ -151,7 +170,7 @@ export default function Dashboard() {
           </div>
 
           {/* Start Button */}
-          <Button disabled={!isFormValid} onClick={() => router.push("/interview/new")} className="w-full">
+          <Button disabled={!isFormValid} onClick={handleStartInterview} className="w-full">
             Start Interview
           </Button>
         </DialogContent>

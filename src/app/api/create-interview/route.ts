@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: Request) {
     try {
-        const { email, aboutYou, role, difficulty } = await req.json();
+        const { email, role, difficulty, category, subCategory, skills, experience, additionalInfo } = await req.json();
         Database.getInstance().isInitialized ? console.log("Database is initialized") : await Database.getInstance().initialize();
 
         const userRepo = Database.getInstance().getRepository(User);
@@ -21,8 +21,12 @@ export async function POST(req: Request) {
         const interview = new Interview();
         interview.id = uuidv4();
         interview.role = role;
-        interview.profile = aboutYou;
         interview.difficulty = difficulty;
+        interview.category = category;
+        interview.subCategory = subCategory;
+        interview.skills = skills;
+        interview.experience = experience;
+        interview.additionalInfo = additionalInfo;
         interview.userId = user.id;
 
         const savedInterview = await interviewRepo.save(interview);

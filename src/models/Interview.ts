@@ -11,7 +11,19 @@ export class Interview extends BaseEntity {
   role: string;
 
   @Column()
-  profile: string;
+  category: string; 
+  
+  @Column()
+  subCategory: string; 
+  
+  @Column("text", { array: true })
+  skills: string[];
+  
+  @Column()
+  experience: string;
+  
+  @Column()
+  additionalInfo: string;
 
   @Column()
   difficulty: string;
